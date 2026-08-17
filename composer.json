@@ -3,9 +3,25 @@
     "description": "Deterministic canonicalization and hashing for PHP 8.4+ payloads adhering to RFC 8785 JCS",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "fingerprint",
+        "hashing",
+        "canonicalization",
+        "rfc8785",
+        "jcs",
+        "json-canonicalization",
+        "deterministic-hash",
+        "payload-hashing"
+    ],
+    "homepage": "https://github.com/alex-kassel/stable-fingerprint",
+    "support": {
+        "issues": "https://github.com/alex-kassel/stable-fingerprint/issues",
+        "source": "https://github.com/alex-kassel/stable-fingerprint"
+    },
     "authors": [
         {
-            "name": "Alex Kassel"
+            "name": "Alexander Macenko",
+            "email": "alexander.macenko@gmail.com"
         }
     ],
     "require": {
@@ -26,6 +42,9 @@
         "psr-4": {
             "AlexKassel\\StableFingerprint\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "config": {
         "sort-packages": true
