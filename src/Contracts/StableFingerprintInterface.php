@@ -10,7 +10,7 @@ interface StableFingerprintInterface
 {
     /**
      * @param null|bool|int|string|array<mixed> $payload
-     * @return lowercase-string
+     * @return lowercase-string Exact 64-character SHA-256 hex string.
      * @throws InvalidPayloadException
      */
     public function hash(mixed $payload): string;

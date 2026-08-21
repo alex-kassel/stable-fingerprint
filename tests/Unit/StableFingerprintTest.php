@@ -71,20 +71,18 @@ class StableFingerprintTest extends TestCase
 
     public function testKnownSha256Vectors(): void
     {
-        // 1. null -> JSON: "null"
-        $nullJson = 'null';
-        $expectedNullHash = hash('sha256', $nullJson);
-        $this->assertSame($expectedNullHash, $this->fingerprint->hash(null));
-
-        // 2. Simple assoc array -> JSON: "{\"a\":1,\"b\":2}"
-        $assocJson = '{"a":1,"b":2}';
-        $expectedAssocHash = hash('sha256', $assocJson);
-        $this->assertSame($expectedAssocHash, $this->fingerprint->hash(['b' => 2, 'a' => 1]));
-
-        // 3. Simple list -> JSON: "[\"first\",\"second\"]"
-        $listJson = '["first","second"]';
-        $expectedListHash = hash('sha256', $listJson);
-        $this->assertSame($expectedListHash, $this->fingerprint->hash(['first', 'second']));
+        $this->assertSame(
+            '74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b',
+            $this->fingerprint->hash(null),
+        );
+        $this->assertSame(
+            '43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777',
+            $this->fingerprint->hash(['b' => 2, 'a' => 1]),
+        );
+        $this->assertSame(
+            'f5ca319099f6b777b72517eb1fd6c40d5fd45f43acd86c0ce687aed7b8a7a0f9',
+            $this->fingerprint->hash(['first', 'second']),
+        );
     }
 
     public function testNoUnicodeNormalization(): void
@@ -137,6 +135,21 @@ class StableFingerprintTest extends TestCase
         $this->fingerprint->hash($invalidUtf8);
     }
 
+    public function testRejectionOfInvalidUtf8AssociativeKey(): void
+    {
+        $this->expectException(InvalidPayloadException::class);
+        $this->fingerprint->hash(["\xC3\x28" => 'value']);
+    }
+
+    public function testRejectionOfRecursiveArray(): void
+    {
+        $recursive = [];
+        $recursive['self'] = &$recursive;
+
+        $this->expectException(InvalidPayloadException::class);
+        $this->fingerprint->hash($recursive);
+    }
+
     public function testRejectionOfMixedAndNonSequentialKeys(): void
     {
         // Non-sequential integer keys
@@ -144,6 +157,12 @@ class StableFingerprintTest extends TestCase
 
         $this->expectException(InvalidPayloadException::class);
         $this->fingerprint->hash($nonSeq);
+    }
+
+    public function testRejectionOfMixedKeys(): void
+    {
+        $this->expectException(InvalidPayloadException::class);
+        $this->fingerprint->hash(['name' => 'Alex', 0 => 'unexpected']);
     }
 
     public function testHashAndBinaryCorrespondence(): void

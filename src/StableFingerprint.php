@@ -6,6 +6,7 @@ namespace AlexKassel\StableFingerprint;
 
 use AlexKassel\StableFingerprint\Contracts\StableFingerprintInterface;
 use AlexKassel\StableFingerprint\Exceptions\InvalidPayloadException;
+use JsonException;
 
 final class StableFingerprint implements StableFingerprintInterface
 {
@@ -44,12 +45,30 @@ final class StableFingerprint implements StableFingerprintInterface
      */
     private function canonicalizeToJson(mixed $payload): string
     {
+        try {
+            // Fail safely on recursive arrays before entering the small
+            // recursive canonicalization pass.
+            json_encode($payload, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new InvalidPayloadException(
+                'Payload cannot be represented as valid JSON.',
+                previous: $exception,
+            );
+        }
+
         $canonical = $this->canonicalize($payload);
 
-        return json_encode(
-            $canonical,
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
-        );
+        try {
+            return json_encode(
+                $canonical,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+            );
+        } catch (JsonException $exception) {
+            throw new InvalidPayloadException(
+                'Canonical payload cannot be encoded as valid JSON.',
+                previous: $exception,
+            );
+        }
     }
 
     /**
@@ -64,7 +83,7 @@ final class StableFingerprint implements StableFingerprintInterface
         }
 
         if (is_string($data)) {
-            if (!mb_check_encoding($data, 'UTF-8')) {
+            if (preg_match('//u', $data) !== 1) {
                 throw new InvalidPayloadException('Payload string contains invalid UTF-8 byte sequences.');
             }
 
@@ -84,6 +103,10 @@ final class StableFingerprint implements StableFingerprintInterface
             foreach (array_keys($data) as $key) {
                 if (!is_string($key)) {
                     throw new InvalidPayloadException('Associative array contains non-string key or non-sequential integer key.');
+                }
+
+                if (preg_match('//u', $key) !== 1) {
+                    throw new InvalidPayloadException('Associative array key contains invalid UTF-8 byte sequences.');
                 }
             }
 
