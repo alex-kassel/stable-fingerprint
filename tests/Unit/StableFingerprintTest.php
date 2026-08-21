@@ -5,39 +5,17 @@ declare(strict_types=1);
 namespace AlexKassel\StableFingerprint\Tests\Unit;
 
 use AlexKassel\StableFingerprint\Exceptions\InvalidPayloadException;
-use AlexKassel\StableFingerprint\Exceptions\UnsupportedAlgorithmException;
 use AlexKassel\StableFingerprint\StableFingerprint;
-use ArrayObject;
-use DateTime;
-use DateTimeZone;
-use JsonSerializable;
 use PHPUnit\Framework\TestCase;
 
-enum SampleBackedEnum: string
+enum SampleEnum: string
 {
-    case ACTIVE = 'active';
-    case INACTIVE = 'inactive';
+    case FOO = 'foo';
 }
 
-enum SampleUnitEnum
+class SampleObject
 {
-    case PENDING;
-}
-
-class SampleDto
-{
-    public string $name = 'Alex';
-    public int $age = 30;
-    protected string $secret = 'hidden';
-    private int $id = 42;
-}
-
-class SampleJsonSerializable implements JsonSerializable
-{
-    public function jsonSerialize(): mixed
-    {
-        return ['custom' => 'payload'];
-    }
+    public string $name = 'test';
 }
 
 class StableFingerprintTest extends TestCase
@@ -51,150 +29,152 @@ class StableFingerprintTest extends TestCase
 
     public function testKeyOrderInvariance(): void
     {
-        $payload1 = ['b' => 2, 'a' => 1, 'nested' => ['z' => 10, 'x' => 5]];
-        $payload2 = ['a' => 1, 'b' => 2, 'nested' => ['x' => 5, 'z' => 10]];
+        $payload1 = ['b' => 2, 'a' => 1];
+        $payload2 = ['a' => 1, 'b' => 2];
 
         $this->assertSame($this->fingerprint->hash($payload1), $this->fingerprint->hash($payload2));
     }
 
     public function testListOrderSensitivity(): void
     {
-        $payload1 = ['items' => ['apple', 'banana']];
-        $payload2 = ['items' => ['banana', 'apple']];
+        $payload1 = ['apple', 'banana'];
+        $payload2 = ['banana', 'apple'];
 
         $this->assertNotSame($this->fingerprint->hash($payload1), $this->fingerprint->hash($payload2));
     }
 
-    public function testListIntegrityAfterPathExclusion(): void
-    {
-        $payload = [
-            'category' => 'test',
-            'items' => ['a', 'b', 'c']
-        ];
-
-        // Path exclusion of items.1 (removes 'b') -> array_values re-indexing guarantees list ["a", "c"]
-        $hashWithExclusion = $this->fingerprint->hash($payload, ['items.1']);
-        $expectedPayload = [
-            'category' => 'test',
-            'items' => ['a', 'c']
-        ];
-
-        $this->assertSame($this->fingerprint->hash($expectedPayload), $hashWithExclusion);
-    }
-
-    public function testWildcardPathExclusion(): void
+    public function testRecursiveSorting(): void
     {
         $payload1 = [
-            'nonce' => '12345',
-            'category' => 'electronics',
-            'items' => [
-                ['name' => 'Phone', 'created_at' => '2026-08-17 10:00:00'],
-                ['name' => 'Laptop', 'created_at' => '2026-08-17 10:05:00'],
-            ]
+            'z' => ['b' => 2, 'a' => 1],
+            'a' => [10, 20],
         ];
 
         $payload2 = [
-            'category' => 'electronics',
-            'items' => [
-                ['name' => 'Phone'],
-                ['name' => 'Laptop'],
-            ]
+            'a' => [10, 20],
+            'z' => ['a' => 1, 'b' => 2],
         ];
 
-        $hash = $this->fingerprint->hash($payload1, ['items.*.created_at', '*.nonce']);
-        $this->assertSame($this->fingerprint->hash($payload2), $hash);
+        $this->assertSame($this->fingerprint->hash($payload1), $this->fingerprint->hash($payload2));
     }
 
-    public function testNonMutatingDateTimeUtcUniformity(): void
+    public function testTypeDistinction(): void
     {
-        $timezoneBerlin = new DateTimeZone('Europe/Berlin');
-        $dt = new DateTime('2026-08-17 20:00:00', $timezoneBerlin);
+        $hashInt = $this->fingerprint->hash(1);
+        $hashString = $this->fingerprint->hash('1');
+        $hashBool = $this->fingerprint->hash(true);
 
-        $hash = $this->fingerprint->hash(['timestamp' => $dt]);
-
-        // Original object timezone must NOT be mutated in memory
-        $this->assertSame('Europe/Berlin', $dt->getTimezone()->getName());
-        $this->assertSame('2026-08-17 20:00:00', $dt->format('Y-m-d H:i:s'));
-
-        // UTC equivalent datetime object
-        $utcDt = new DateTime('2026-08-17 18:00:00', new DateTimeZone('UTC'));
-        $this->assertSame($this->fingerprint->hash(['timestamp' => $utcDt]), $hash);
+        $this->assertNotSame($hashInt, $hashString);
+        $this->assertNotSame($hashInt, $hashBool);
+        $this->assertNotSame($hashString, $hashBool);
     }
 
-    public function testDtoAndEnumNormalization(): void
+    public function testKnownSha256Vectors(): void
     {
-        $dto = new SampleDto();
-        $payload = [
-            'user' => $dto,
-            'status' => SampleBackedEnum::ACTIVE,
-            'unit' => SampleUnitEnum::PENDING,
-        ];
+        // 1. null -> JSON: "null"
+        $nullJson = 'null';
+        $expectedNullHash = hash('sha256', $nullJson);
+        $this->assertSame($expectedNullHash, $this->fingerprint->hash(null));
 
-        $expected = [
-            'user' => ['name' => 'Alex', 'age' => 30],
-            'status' => 'active',
-            'unit' => 'PENDING',
-        ];
+        // 2. Simple assoc array -> JSON: "{\"a\":1,\"b\":2}"
+        $assocJson = '{"a":1,"b":2}';
+        $expectedAssocHash = hash('sha256', $assocJson);
+        $this->assertSame($expectedAssocHash, $this->fingerprint->hash(['b' => 2, 'a' => 1]));
 
-        $this->assertSame($this->fingerprint->hash($expected), $this->fingerprint->hash($payload));
+        // 3. Simple list -> JSON: "[\"first\",\"second\"]"
+        $listJson = '["first","second"]';
+        $expectedListHash = hash('sha256', $listJson);
+        $this->assertSame($expectedListHash, $this->fingerprint->hash(['first', 'second']));
     }
 
-    public function testJsonSerializableAndTraversableHandling(): void
+    public function testNoUnicodeNormalization(): void
     {
-        $jsonSer = new SampleJsonSerializable();
-        $traversable = new ArrayObject(['first' => 1, 'second' => 2]);
+        // NFC (precomposed e-acute: U+00E9) vs NFD (decomposed e + combining acute accent: U+0065 U+0301)
+        $nfc = "\u{00E9}";
+        $nfd = "e\u{0301}";
 
-        $payload = [
-            'data' => $jsonSer,
-            'collection' => $traversable,
-        ];
-
-        $expected = [
-            'data' => ['custom' => 'payload'],
-            'collection' => ['first' => 1, 'second' => 2],
-        ];
-
-        $this->assertSame($this->fingerprint->hash($expected), $this->fingerprint->hash($payload));
+        $this->assertNotSame($nfc, $nfd);
+        $this->assertNotSame($this->fingerprint->hash($nfc), $this->fingerprint->hash($nfd));
     }
 
-    public function testCircularReferenceProtection(): void
+    public function testRejectionOfFloat(): void
     {
-        $a = new \stdClass();
-        $b = new \stdClass();
-        $a->b = $b;
-        $b->a = $a;
+        $this->expectException(InvalidPayloadException::class);
+        $this->fingerprint->hash(1.23);
+    }
+
+    public function testRejectionOfObject(): void
+    {
+        $this->expectException(InvalidPayloadException::class);
+        $this->fingerprint->hash(new SampleObject());
+    }
+
+    public function testRejectionOfEnum(): void
+    {
+        $this->expectException(InvalidPayloadException::class);
+        $this->fingerprint->hash(SampleEnum::FOO);
+    }
+
+    public function testRejectionOfResource(): void
+    {
+        $resource = fopen('php://memory', 'rb');
+
+        try {
+            $this->expectException(InvalidPayloadException::class);
+            $this->fingerprint->hash($resource);
+        } finally {
+            if (is_resource($resource)) {
+                fclose($resource);
+            }
+        }
+    }
+
+    public function testRejectionOfInvalidUtf8(): void
+    {
+        $invalidUtf8 = "\xC3\x28";
 
         $this->expectException(InvalidPayloadException::class);
-        $this->expectExceptionMessage('Circular reference detected');
-
-        $this->fingerprint->hash($a);
+        $this->fingerprint->hash($invalidUtf8);
     }
 
-    public function testFloatJcsStabilityAndSpecialFloatRejection(): void
+    public function testRejectionOfMixedAndNonSequentialKeys(): void
     {
-        $floatVal = 1.2345678901234;
-        $hash1 = $this->fingerprint->hash(['val' => $floatVal]);
-
-        ini_set('serialize_precision', '14');
-        $hash2 = $this->fingerprint->hash(['val' => $floatVal]);
-
-        $this->assertSame($hash1, $hash2);
+        // Non-sequential integer keys
+        $nonSeq = [0 => 'a', 2 => 'b'];
 
         $this->expectException(InvalidPayloadException::class);
-        $this->fingerprint->hash(['nan' => NAN]);
+        $this->fingerprint->hash($nonSeq);
     }
 
-    public function testAlgorithmChoiceAndUnsupportedAlgorithm(): void
+    public function testHashAndBinaryCorrespondence(): void
     {
-        $payload = ['foo' => 'bar'];
+        $payload = ['name' => 'Alex', 'age' => 30, 'roles' => ['admin', 'user']];
 
-        $sha256 = $this->fingerprint->hash($payload, [], 'sha256');
-        $this->assertSame(64, strlen($sha256));
+        $hashHex = $this->fingerprint->hash($payload);
+        $binaryRaw = $this->fingerprint->binary($payload);
 
-        $md5 = $this->fingerprint->hash($payload, [], 'md5');
-        $this->assertSame(32, strlen($md5));
+        $this->assertSame(64, strlen($hashHex));
+        $this->assertSame(32, strlen($binaryRaw));
+        $this->assertSame($hashHex, bin2hex($binaryRaw));
+    }
 
-        $this->expectException(UnsupportedAlgorithmException::class);
-        $this->fingerprint->hash($payload, [], 'invalid_algo_name');
+    public function testInputArrayNotMutated(): void
+    {
+        $original = [
+            'z' => 10,
+            'a' => 5,
+            'nested' => [
+                'y' => 100,
+                'x' => 50,
+            ],
+        ];
+
+        $originalCopy = $original;
+
+        $this->fingerprint->hash($original);
+
+        $this->assertSame($originalCopy, $original);
+        $this->assertSame(array_keys($original), ['z', 'a', 'nested']);
+        $this->assertSame(array_keys($original['nested']), ['y', 'x']);
     }
 }

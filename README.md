@@ -3,40 +3,42 @@
 [![PHP Version Require](https://img.shields.io/badge/php-%5E8.4-8892BF.svg)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
-**Deterministic canonicalization and payload hashing for PHP 8.4+ adhering strictly to RFC 8785 JSON Canonicalization Scheme (JCS).**
+**Deterministic SHA-256 canonicalization and payload hashing for PHP 8.4+.**
+
+`StableFingerprint` provides a compact, deterministic PHP canonicalization and hashing algorithm designed for small, pre-prepared data payloads. It validates payload grammar, normalizes key order for associative arrays, formats compact JSON, and outputs SHA-256 hex or raw binary digests.
 
 ---
 
-## Overview
+## Grammar & Features
 
-In modern PHP applications, generating deterministic hashes for data structures (DTOs, API request payloads, database entities, webhooks) is often unreliable. Default `json_encode()` outputs vary across environments due to:
-* Unsorted associative array keys.
-* Differing float serialization precision settings (`serialize_precision`).
-* Non-standardized `DateTimeInterface` timezones and formats.
-* Inconsistent Unicode normalization forms (NFC vs NFD).
-* Presence of transient dynamic fields like timestamps, nonces, or request IDs.
+### Supported Payload Grammar
+- `null`
+- `bool` (`true`, `false`)
+- `int`
+- Valid UTF-8 `string`
+- Sequential list arrays with integer keys `0..n-1`
+- Associative arrays with string keys ONLY
+- Recursive combinations of the above types
 
-`StableFingerprint` solves this by normalizing any PHP payload (arrays, objects, Enums, dates, scalar values) into a canonical structure following **RFC 8785 JCS** principles before producing a stable cryptographic digest.
+### Deterministic Canonicalization Specs
+- **Associative Key Sorting**: Associative array keys are recursively sorted using bytewise `SORT_STRING`.
+- **List Order Integrity**: Indexed list order is preserved (`0..n-1`).
+- **No Type Coercion or Normalization**: Scalar types (`1`, `"1"`, `true`) hash distinctly. Strings are hashed exactly as passed without Unicode or business normalization.
+- **Fixed SHA-256 Output**: Generates compact JSON (`JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR`) and hashes via SHA-256.
 
----
-
-## Key Features
-
-* **RFC 8785 JCS Compliance**: Strict float serialization precision handling (`serialize_precision = -1`) and key ordering.
-* **Deterministic Array Key Sorting**: Alphabetical recursive `ksort` for associative arrays while preserving indexed list sequence integrity (`array_is_list`).
-* **UTC DateTime Normalization**: Automatic conversion of any `DateTimeInterface` instance to standardized UTC ISO-8601 strings (`Y-m-d\TH:i:s.u\Z`).
-* **PHP 8 Enums & Interfaces Support**: Built-in support for `BackedEnum`, `UnitEnum`, `JsonSerializable`, `Traversable`, and standard Data Transfer Objects (DTOs).
-* **Wildcard Segment Path Exclusion**: Dot-notation wildcard pattern matching (e.g. `meta.timestamp`, `*.nonce`, `user.id`) to ignore volatile attributes during hashing.
-* **Circular Reference Guard**: Memory safety via `SplObjectStorage` preventing infinite loops on nested object graphs.
-* **Unicode Canonicalization**: Normalization of UTF-8 strings into Unicode Form C (NFC) via `ext-intl`.
-* **Flexible Algorithm Choice**: Support for any PHP native hashing algorithm (`md5`, `sha256`, `xxh128`, `sha3-512`, etc.).
+### Rejected / Forbidden Types (`InvalidPayloadException`)
+- `float`
+- `object` (including DTOs, Enums, `DateTimeInterface`, `JsonSerializable`, `Traversable`, `Closure`)
+- `resource`
+- Mixed or non-sequential integer array keys
+- Invalid UTF-8 strings
 
 ---
 
 ## Requirements
 
 * **PHP**: `^8.4`
-* **PHP Extensions**: `ext-json`, `ext-hash`, `ext-intl`
+* **PHP Extensions**: `ext-json`, `ext-hash`
 
 ---
 
@@ -50,110 +52,99 @@ composer require alex-kassel/stable-fingerprint
 
 ---
 
-## Quick Start
+## Public API
+
+```php
+namespace AlexKassel\StableFingerprint\Contracts;
+
+use AlexKassel\StableFingerprint\Exceptions\InvalidPayloadException;
+
+interface StableFingerprintInterface
+{
+    /**
+     * @param null|bool|int|string|array<mixed> $payload
+     * @return lowercase-string 64-character SHA-256 hex string.
+     * @throws InvalidPayloadException
+     */
+    public function hash(mixed $payload): string;
+
+    /**
+     * @param null|bool|int|string|array<mixed> $payload
+     * @return non-empty-string Exact 32 raw SHA-256 bytes.
+     * @throws InvalidPayloadException
+     */
+    public function binary(mixed $payload): string;
+}
+```
+
+---
+
+## Quick Start & Usage Examples
+
+### 1. Generating Hashes
 
 ```php
 use AlexKassel\StableFingerprint\StableFingerprint;
 
 $fingerprint = new StableFingerprint();
 
-// 1. Basic deterministic payload hashing
 $payload = [
-    'b' => 2,
-    'a' => 1,
-    'user' => [
-        'email' => 'user@example.com',
-        'role' => 'admin',
+    'user_id' => 1042,
+    'tags' => ['admin', 'active'],
+    'profile' => [
+        'email' => 'alex@example.com',
+        'verified' => true,
     ],
 ];
 
-// Returns deterministic MD5 hash (default algorithm)
-$hash = $fingerprint->hash($payload);
+// Returns 64-character lowercase SHA-256 hex string
+$hexHash = $fingerprint->hash($payload);
+// e.g. "6a7b..."
+
+// Returns raw 32 SHA-256 bytes
+$binaryHash = $fingerprint->binary($payload);
+assert($hexHash === bin2hex($binaryHash));
 ```
 
-Regardless of key order, float precision, or PHP environment, the generated hash remains identical.
-
----
-
-## Advanced Usage
-
-### Custom Hashing Algorithms
-
-You can specify any algorithm supported by `hash_algos()` (e.g. `sha256`, `xxh128`, `sha3-256`):
+### 2. Key Order Invariance & List Preservation
 
 ```php
-$sha256Hash = $fingerprint->hash($payload, algo: 'sha256');
-$xxhHash = $fingerprint->hash($payload, algo: 'xxh128');
+// Associative array keys order does not affect the generated hash:
+$payload1 = ['b' => 2, 'a' => 1, 'nested' => ['z' => 10, 'y' => 5]];
+$payload2 = ['a' => 1, 'b' => 2, 'nested' => ['y' => 5, 'z' => 10]];
+
+assert($fingerprint->hash($payload1) === $fingerprint->hash($payload2));
+
+// Sequential list array order is preserved:
+$list1 = ['apple', 'banana'];
+$list2 = ['banana', 'apple'];
+
+assert($fingerprint->hash($list1) !== $fingerprint->hash($list2));
 ```
 
-### Excluding Volatile & Dynamic Fields
+### 3. Handling Invalid Inputs
 
-To hash payloads while ignoring transient properties (such as timestamps, request IDs, or nonces), pass dot-notation exclusion patterns as the second argument:
-
-```php
-$payload = [
-    'order_id' => 1042,
-    'amount' => 99.99,
-    'meta' => [
-        'created_at' => new DateTimeImmutable(),
-        'nonce' => 'abc-123-xyz',
-    ],
-    'history' => [
-        ['timestamp' => 1700000000, 'status' => 'pending'],
-        ['timestamp' => 1700000500, 'status' => 'completed'],
-    ],
-];
-
-// Exclude exact paths or wildcard sub-keys
-$hash = $fingerprint->hash($payload, excludePaths: [
-    'meta.created_at',
-    '*.nonce',
-    'history.*.timestamp',
-]);
-```
-
-### Object, Enum & DateTime Handling
-
-`StableFingerprint` handles complex PHP structures out of the box:
+Any unsupported type (e.g. `float`, objects, non-UTF-8 strings, invalid array keys) throws `InvalidPayloadException`:
 
 ```php
-enum UserStatus: string {
-    case Active = 'active';
+use AlexKassel\StableFingerprint\Exceptions\InvalidPayloadException;
+
+try {
+    $fingerprint->hash(['amount' => 99.99]); // Floats are prohibited
+} catch (InvalidPayloadException $e) {
+    echo $e->getMessage(); // "Float values are not allowed in payload."
 }
-
-class OrderDTO {
-    public function __construct(
-        public int $id,
-        public UserStatus $status,
-        public DateTimeImmutable $createdAt,
-    ) {}
-}
-
-$dto = new OrderDTO(
-    id: 42,
-    status: UserStatus::Active,
-    createdAt: new DateTimeImmutable('2026-08-17 20:00:00', new DateTimeZone('Europe/Berlin'))
-);
-
-// DateTime objects are automatically converted to UTC ISO-8601 strings
-// Enums are resolved to their backing scalar values or names
-$hash = $fingerprint->hash($dto);
 ```
 
 ---
 
-## Testing
+## Testing & Quality Checks
 
-Run the PHPUnit test suite:
+Run the test suite and validate composer dependencies:
 
 ```bash
+composer validate --strict
 composer test
-```
-
-Or execute PHPUnit directly:
-
-```bash
-vendor/bin/phpunit
 ```
 
 ---
@@ -161,5 +152,3 @@ vendor/bin/phpunit
 ## License
 
 This package is open-source software licensed under the [MIT License](LICENSE).
-
-Created and maintained by [Alexander Macenko](https://github.com/alex-kassel).
