@@ -1,9 +1,9 @@
 # StableFingerprint
 
-[![PHP Version Require](https://img.shields.io/badge/php-%5E8.4-8892BF.svg)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
+[![PHP Version Require](https://img.shields.io/badge/php-%5E8.3%20%7C%7C%20%5E8.4-8892BF.svg)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
-**Deterministic SHA-256 canonicalization and payload hashing for PHP 8.4+.**
+**Deterministic SHA-256 canonicalization and payload hashing for PHP 8.3+.**
 
 `StableFingerprint` provides a compact, deterministic PHP canonicalization and hashing algorithm designed for small, pre-prepared data payloads. It validates payload grammar, normalizes key order for associative arrays, formats compact JSON, and outputs SHA-256 hex or raw binary digests.
 
@@ -37,7 +37,7 @@
 
 ## Requirements
 
-* **PHP**: `^8.4`
+* **PHP**: `^8.3 || ^8.4`
 * **PHP Extensions**: `ext-json`, `ext-hash`
 
 ---
