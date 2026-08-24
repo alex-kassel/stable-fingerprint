@@ -95,10 +95,18 @@ class StableFingerprintTest extends TestCase
         $this->assertNotSame($this->fingerprint->hash($nfc), $this->fingerprint->hash($nfd));
     }
 
-    public function testRejectionOfFloat(): void
+    public function testFiniteFloatHashing(): void
+    {
+        $hash1 = $this->fingerprint->hash(1.23);
+        $hash2 = $this->fingerprint->hash(1.23);
+        $this->assertSame($hash1, $hash2);
+        $this->assertNotEmpty($hash1);
+    }
+
+    public function testRejectionOfInfiniteFloat(): void
     {
         $this->expectException(InvalidPayloadException::class);
-        $this->fingerprint->hash(1.23);
+        $this->fingerprint->hash(INF);
     }
 
     public function testRejectionOfObject(): void

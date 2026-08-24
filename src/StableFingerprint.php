@@ -24,6 +24,11 @@ final class StableFingerprint implements StableFingerprintInterface
         return hash('sha256', $json);
     }
 
+    public static function compute(mixed $payload): string
+    {
+        return (new self())->hash($payload);
+    }
+
     /**
      * Calculate a deterministic raw binary SHA-256 hash (32 bytes) from the payload.
      *
@@ -122,7 +127,11 @@ final class StableFingerprint implements StableFingerprintInterface
         }
 
         if (is_float($data)) {
-            throw new InvalidPayloadException('Float values are not allowed in payload.');
+            if (!is_finite($data)) {
+                throw new InvalidPayloadException('Non-finite float values (INF/NAN) are not allowed in payload.');
+            }
+
+            return $data;
         }
 
         if (is_object($data)) {
