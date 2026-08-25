@@ -8,8 +8,8 @@
 ## 📋 Executive Release Summary
 
 - **Package Name:** `alex-kassel/stable-fingerprint`
-- **Target Release Version:** `2.0.0`
-- **Target Branch / Commit:** `main` (`e6242db`)
+- **Target Release Version:** `2.1.0`
+- **Target Branch / Commit:** `main` (`feae8e6`)
 - **Release Verdict:** 🟢 **READY**
 - **Audit Framework Version:** `v1.0.8`
 - **Certification Date:** 2026-08-25
@@ -70,7 +70,7 @@ OK (18 tests, 28 assertions)
 {
   "audit_run": ".audit/runs/alex-kassel/stable-fingerprint/2026-08-25_18-35-00",
   "package": "alex-kassel/stable-fingerprint",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "framework": "https://github.com/alex-kassel/laravel-package-audit",
   "environment": {
     "php": "8.4.24",
