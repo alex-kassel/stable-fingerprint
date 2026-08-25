@@ -19,5 +19,6 @@ if ($autoloader === null) {
     throw new RuntimeException('Composer autoloader not found.');
 }
 
+/** @var \Composer\Autoload\ClassLoader $autoloader */
 $autoloader->addPsr4('AlexKassel\\StableFingerprint\\', __DIR__ . '/../src');
 $autoloader->addPsr4('AlexKassel\\StableFingerprint\\Tests\\', __DIR__);

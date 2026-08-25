@@ -13,7 +13,7 @@ final class StableFingerprint implements StableFingerprintInterface
     /**
      * Calculate a deterministic SHA-256 hex hash (64 lowercase characters) from the payload.
      *
-     * @param null|bool|int|string|array<mixed> $payload
+     * @param mixed $payload
      * @return lowercase-string
      * @throws InvalidPayloadException
      */
@@ -32,7 +32,7 @@ final class StableFingerprint implements StableFingerprintInterface
     /**
      * Calculate a deterministic raw binary SHA-256 hash (32 bytes) from the payload.
      *
-     * @param null|bool|int|string|array<mixed> $payload
+     * @param mixed $payload
      * @return non-empty-string Exact 32 raw SHA-256 bytes.
      * @throws InvalidPayloadException
      */
