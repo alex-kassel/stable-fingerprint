@@ -6,6 +6,4 @@ namespace AlexKassel\StableFingerprint\Exceptions;
 
 use Throwable;
 
-interface StableFingerprintException extends Throwable
-{
-}
+interface StableFingerprintException extends Throwable {}

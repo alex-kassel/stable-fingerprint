@@ -13,8 +13,8 @@ final class StableFingerprint implements StableFingerprintInterface
     /**
      * Calculate a deterministic SHA-256 hex hash (64 lowercase characters) from the payload.
      *
-     * @param mixed $payload
      * @return lowercase-string
+     *
      * @throws InvalidPayloadException
      */
     public function hash(mixed $payload): string
@@ -26,14 +26,14 @@ final class StableFingerprint implements StableFingerprintInterface
 
     public static function compute(mixed $payload): string
     {
-        return (new self())->hash($payload);
+        return (new self)->hash($payload);
     }
 
     /**
      * Calculate a deterministic raw binary SHA-256 hash (32 bytes) from the payload.
      *
-     * @param mixed $payload
      * @return non-empty-string Exact 32 raw SHA-256 bytes.
+     *
      * @throws InvalidPayloadException
      */
     public function binary(mixed $payload): string
@@ -106,7 +106,7 @@ final class StableFingerprint implements StableFingerprintInterface
             }
 
             foreach (array_keys($data) as $key) {
-                if (!is_string($key)) {
+                if (! is_string($key)) {
                     throw new InvalidPayloadException('Associative array contains non-string key or non-sequential integer key.');
                 }
 
@@ -127,7 +127,7 @@ final class StableFingerprint implements StableFingerprintInterface
         }
 
         if (is_float($data)) {
-            if (!is_finite($data)) {
+            if (! is_finite($data)) {
                 throw new InvalidPayloadException('Non-finite float values (INF/NAN) are not allowed in payload.');
             }
 

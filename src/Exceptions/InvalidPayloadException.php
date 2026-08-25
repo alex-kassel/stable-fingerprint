@@ -6,6 +6,4 @@ namespace AlexKassel\StableFingerprint\Exceptions;
 
 use InvalidArgumentException;
 
-final class InvalidPayloadException extends InvalidArgumentException implements StableFingerprintException
-{
-}
+final class InvalidPayloadException extends InvalidArgumentException implements StableFingerprintException {}

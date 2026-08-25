@@ -9,15 +9,15 @@ use AlexKassel\StableFingerprint\Exceptions\InvalidPayloadException;
 interface StableFingerprintInterface
 {
     /**
-     * @param mixed $payload
      * @return lowercase-string Exact 64-character SHA-256 hex string.
+     *
      * @throws InvalidPayloadException
      */
     public function hash(mixed $payload): string;
 
     /**
-     * @param mixed $payload
      * @return non-empty-string Exact 32 raw SHA-256 bytes.
+     *
      * @throws InvalidPayloadException
      */
     public function binary(mixed $payload): string;

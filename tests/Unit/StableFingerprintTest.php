@@ -24,10 +24,10 @@ class StableFingerprintTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->fingerprint = new StableFingerprint();
+        $this->fingerprint = new StableFingerprint;
     }
 
-    public function testKeyOrderInvariance(): void
+    public function test_key_order_invariance(): void
     {
         $payload1 = ['b' => 2, 'a' => 1];
         $payload2 = ['a' => 1, 'b' => 2];
@@ -35,7 +35,7 @@ class StableFingerprintTest extends TestCase
         $this->assertSame($this->fingerprint->hash($payload1), $this->fingerprint->hash($payload2));
     }
 
-    public function testListOrderSensitivity(): void
+    public function test_list_order_sensitivity(): void
     {
         $payload1 = ['apple', 'banana'];
         $payload2 = ['banana', 'apple'];
@@ -43,7 +43,7 @@ class StableFingerprintTest extends TestCase
         $this->assertNotSame($this->fingerprint->hash($payload1), $this->fingerprint->hash($payload2));
     }
 
-    public function testRecursiveSorting(): void
+    public function test_recursive_sorting(): void
     {
         $payload1 = [
             'z' => ['b' => 2, 'a' => 1],
@@ -58,7 +58,7 @@ class StableFingerprintTest extends TestCase
         $this->assertSame($this->fingerprint->hash($payload1), $this->fingerprint->hash($payload2));
     }
 
-    public function testTypeDistinction(): void
+    public function test_type_distinction(): void
     {
         $hashInt = $this->fingerprint->hash(1);
         $hashString = $this->fingerprint->hash('1');
@@ -69,7 +69,7 @@ class StableFingerprintTest extends TestCase
         $this->assertNotSame($hashString, $hashBool);
     }
 
-    public function testKnownSha256Vectors(): void
+    public function test_known_sha256_vectors(): void
     {
         $this->assertSame(
             '74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b',
@@ -85,7 +85,7 @@ class StableFingerprintTest extends TestCase
         );
     }
 
-    public function testNoUnicodeNormalization(): void
+    public function test_no_unicode_normalization(): void
     {
         // NFC (precomposed e-acute: U+00E9) vs NFD (decomposed e + combining acute accent: U+0065 U+0301)
         $nfc = "\u{00E9}";
@@ -95,7 +95,7 @@ class StableFingerprintTest extends TestCase
         $this->assertNotSame($this->fingerprint->hash($nfc), $this->fingerprint->hash($nfd));
     }
 
-    public function testFiniteFloatHashing(): void
+    public function test_finite_float_hashing(): void
     {
         $hash1 = $this->fingerprint->hash(1.23);
         $hash2 = $this->fingerprint->hash(1.23);
@@ -103,25 +103,25 @@ class StableFingerprintTest extends TestCase
         $this->assertNotEmpty($hash1);
     }
 
-    public function testRejectionOfInfiniteFloat(): void
+    public function test_rejection_of_infinite_float(): void
     {
         $this->expectException(InvalidPayloadException::class);
         $this->fingerprint->hash(INF);
     }
 
-    public function testRejectionOfObject(): void
+    public function test_rejection_of_object(): void
     {
         $this->expectException(InvalidPayloadException::class);
-        $this->fingerprint->hash(new SampleObject());
+        $this->fingerprint->hash(new SampleObject);
     }
 
-    public function testRejectionOfEnum(): void
+    public function test_rejection_of_enum(): void
     {
         $this->expectException(InvalidPayloadException::class);
         $this->fingerprint->hash(SampleEnum::FOO);
     }
 
-    public function testRejectionOfResource(): void
+    public function test_rejection_of_resource(): void
     {
         $resource = fopen('php://memory', 'rb');
 
@@ -135,7 +135,7 @@ class StableFingerprintTest extends TestCase
         }
     }
 
-    public function testRejectionOfInvalidUtf8(): void
+    public function test_rejection_of_invalid_utf8(): void
     {
         $invalidUtf8 = "\xC3\x28";
 
@@ -143,13 +143,13 @@ class StableFingerprintTest extends TestCase
         $this->fingerprint->hash($invalidUtf8);
     }
 
-    public function testRejectionOfInvalidUtf8AssociativeKey(): void
+    public function test_rejection_of_invalid_utf8_associative_key(): void
     {
         $this->expectException(InvalidPayloadException::class);
         $this->fingerprint->hash(["\xC3\x28" => 'value']);
     }
 
-    public function testRejectionOfRecursiveArray(): void
+    public function test_rejection_of_recursive_array(): void
     {
         $recursive = [];
         $recursive['self'] = &$recursive;
@@ -158,7 +158,7 @@ class StableFingerprintTest extends TestCase
         $this->fingerprint->hash($recursive);
     }
 
-    public function testRejectionOfMixedAndNonSequentialKeys(): void
+    public function test_rejection_of_mixed_and_non_sequential_keys(): void
     {
         // Non-sequential integer keys
         $nonSeq = [0 => 'a', 2 => 'b'];
@@ -167,13 +167,13 @@ class StableFingerprintTest extends TestCase
         $this->fingerprint->hash($nonSeq);
     }
 
-    public function testRejectionOfMixedKeys(): void
+    public function test_rejection_of_mixed_keys(): void
     {
         $this->expectException(InvalidPayloadException::class);
         $this->fingerprint->hash(['name' => 'Alex', 0 => 'unexpected']);
     }
 
-    public function testHashAndBinaryCorrespondence(): void
+    public function test_hash_and_binary_correspondence(): void
     {
         $payload = ['name' => 'Alex', 'age' => 30, 'roles' => ['admin', 'user']];
 
@@ -185,7 +185,7 @@ class StableFingerprintTest extends TestCase
         $this->assertSame($hashHex, bin2hex($binaryRaw));
     }
 
-    public function testInputArrayNotMutated(): void
+    public function test_input_array_not_mutated(): void
     {
         $original = [
             'z' => 10,
