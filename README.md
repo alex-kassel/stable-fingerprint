@@ -1,12 +1,16 @@
-<div align="center">
+<h1 align="center">🔑 Stable Fingerprint</h1>
 
-# 🔑 Stable Fingerprint
+<p align="center">
+  <strong>Deterministic SHA-256 fingerprinting and recursive canonical payload hashing for PHP 8.2+</strong>
+</p>
 
-### Deterministic SHA-256 fingerprinting and recursive canonical payload hashing for PHP 8.2+
-
-[Installation](#installation) • [Basic Hashing](#basic-hashing) • [Features](#key-features) • [Release Gate](RELEASE-GATE.md) • [Changelog](CHANGELOG.md)
-
-<br>
+<p align="center">
+  <a href="#installation">Installation</a> •
+  <a href="#basic-hashing">Basic Hashing</a> •
+  <a href="#key-features">Key Features</a> •
+  <a href="RELEASE-GATE.md">Release Gate</a> •
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
 
 <p align="center">
   <a href="RELEASE-GATE.md"><img src="https://img.shields.io/badge/Audit-Verified-10b981?logo=shield" alt="Audit Verified"></a>
@@ -14,8 +18,6 @@
   <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.2+-777bb4?logo=php&logoColor=white" alt="PHP Support"></a>
   <a href="RELEASE-GATE.md"><img src="https://img.shields.io/badge/PHPStan-Level%20Max-8b5cf6?logo=php&logoColor=white" alt="PHPStan Level Max"></a>
 </p>
-
-</div>
 
 ---
 
