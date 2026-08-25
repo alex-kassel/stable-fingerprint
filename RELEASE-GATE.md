@@ -1,11 +1,5 @@
 # 🚦 Release Gate Certification
 
-[![Audit Status](https://img.shields.io/badge/Audit-360%C2%B0%20Verified-10b981?style=for-the-badge&logo=shield)](RELEASE-GATE.md)
-[![Verdict](https://img.shields.io/badge/Verdict-READY-10b981?style=for-the-badge)](RELEASE-GATE.md)
-[![Static Analysis](https://img.shields.io/badge/PHPStan-Level%20Max-8b5cf6?style=for-the-badge&logo=php&logoColor=white)](RELEASE-GATE.md)
-[![Tests](https://img.shields.io/badge/Tests-100%25%20Passing-10b981?style=for-the-badge&logo=github&logoColor=white)](RELEASE-GATE.md)
-[![Security](https://img.shields.io/badge/Security-0%20Advisories-10b981?style=for-the-badge&logo=dependabot&logoColor=white)](RELEASE-GATE.md)
-
 > 🛡️ **Audited by [Laravel Package Audit Framework](https://github.com/alex-kassel/laravel-package-audit)**  
 > This package has successfully passed all 7 industrial verification gates in accordance with the official 360-degree Laravel / PHP audit specification.
 

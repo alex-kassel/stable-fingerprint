@@ -1,10 +1,9 @@
 # StableFingerprint
 
-[![Audited by Laravel Package Audit](https://img.shields.io/badge/Audit-360%C2%B0%20Verified-10b981?style=for-the-badge&logo=shield)](RELEASE-GATE.md)
+[![Audited by Laravel Package Audit](https://img.shields.io/badge/Audited%20by-Laravel%20Package%20Audit-10b981?style=for-the-badge&logo=shield)](RELEASE-GATE.md)
 [![Latest Version](https://img.shields.io/packagist/v/alex-kassel/stable-fingerprint?style=for-the-badge&logo=packagist&logoColor=white&color=f59e0b)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
-[![Tests](https://img.shields.io/github/actions/workflow/status/alex-kassel/stable-fingerprint/tests.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=tests&color=10b981)](https://github.com/alex-kassel/stable-fingerprint/actions/workflows/tests.yml)
 [![PHPStan](https://img.shields.io/badge/PHPStan-Level%20Max-8b5cf6?style=for-the-badge&logo=php&logoColor=white)](RELEASE-GATE.md)
-[![PHP](https://img.shields.io/packagist/dependency-v/alex-kassel/stable-fingerprint/php?style=for-the-badge&logo=php&logoColor=white&color=4f46e5)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
+[![PHP](https://img.shields.io/packagist/dependency-v/alex-kassel/stable-fingerprint/php?style=for-the-badge&logo=php&logoColor=white&color=777bb4)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![Downloads](https://img.shields.io/packagist/dt/alex-kassel/stable-fingerprint?style=for-the-badge&logo=packagist&logoColor=white&color=0284c7)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![License](https://img.shields.io/packagist/l/alex-kassel/stable-fingerprint?style=for-the-badge&color=0d9488)](LICENSE)
 
