@@ -1,15 +1,29 @@
-# StableFingerprint
+# Stable Fingerprint
 
 [![Audited by Laravel Package Audit](https://img.shields.io/badge/Audited%20by-Laravel%20Package%20Audit-10b981?style=for-the-badge&logo=shield)](RELEASE-GATE.md)
 [![Latest Version](https://img.shields.io/packagist/v/alex-kassel/stable-fingerprint?style=for-the-badge&logo=packagist&logoColor=white&color=f59e0b)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![PHPStan](https://img.shields.io/badge/PHPStan-Level%20Max-8b5cf6?style=for-the-badge&logo=php&logoColor=white)](RELEASE-GATE.md)
 [![PHP](https://img.shields.io/packagist/dependency-v/alex-kassel/stable-fingerprint/php?style=for-the-badge&logo=php&logoColor=white&color=777bb4)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![Downloads](https://img.shields.io/packagist/dt/alex-kassel/stable-fingerprint?style=for-the-badge&logo=packagist&logoColor=white&color=0284c7)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
-[![License](https://img.shields.io/packagist/l/alex-kassel/stable-fingerprint?style=for-the-badge&color=0d9488)](LICENSE)
+[![License](https://img.shields.io/github/license/alex-kassel/stable-fingerprint?style=for-the-badge&color=0d9488)](LICENSE)
 
 Small, deterministic SHA-256 fingerprints for pre-prepared PHP payloads.
 
-StableFingerprint recursively sorts associative keys, preserves list order, canonicalizes finite float values, encodes compact JSON and returns either a hexadecimal or raw binary SHA-256 digest. It deliberately avoids object normalization and business-specific data cleanup.
+StableFingerprint recursively sorts associative keys, preserves list order, canonicalizes finite float values, encodes compact JSON, and returns either a hexadecimal or raw binary SHA-256 digest. It deliberately avoids object normalization and business-specific data cleanup.
+
+## Features
+
+- **Deterministic Payload Hashing**: Generates consistent 64-character hex (`hash()`) or 32-byte binary (`binary()`) SHA-256 digests.
+- **Recursive Key Sorting**: Normalizes associative arrays with byte-wise `SORT_STRING` key ordering regardless of initial key sequence.
+- **List Order Preservation**: Preserves exact sequence for sequential indexed lists (`0..n-1`).
+- **Finite Float Canonicalization**: Accurately normalizes finite floats while rejecting non-finite values (`INF`, `NAN`).
+- **Strict Input Validation**: Rejects objects, enums, resources, invalid UTF-8 byte sequences, and cyclic references via `InvalidPayloadException`.
+- **Static Convenience API**: Quick hashing with `StableFingerprint::compute($payload)`.
+
+## Requirements
+
+- PHP 8.2, 8.3, or 8.4
+- Standard PHP extensions: `ext-hash` and `ext-json`
 
 ## Installation
 
@@ -17,9 +31,9 @@ StableFingerprint recursively sorts associative keys, preserves list order, cano
 composer require alex-kassel/stable-fingerprint
 ```
 
-Requires PHP 8.2+ with the standard JSON and Hash extensions.
-
 ## Usage
+
+### Basic Hashing
 
 ```php
 use AlexKassel\StableFingerprint\StableFingerprint;
@@ -41,54 +55,51 @@ $binary = $fingerprint->binary($payload); // 32 raw bytes
 assert($hex === bin2hex($binary));
 ```
 
-You can also use the static convenience helper:
+### Static Convenience Helper
 
 ```php
+use AlexKassel\StableFingerprint\StableFingerprint;
+
 $hex = StableFingerprint::compute($payload);
 ```
 
-Associative key order does not affect the result:
+### Associative Key Normalization
+
+Associative key order does not affect the resulting hash:
 
 ```php
 $fingerprint->hash(['b' => 2, 'a' => 1])
     === $fingerprint->hash(['a' => 1, 'b' => 2]);
 ```
 
-List order remains significant:
+### List Ordering
+
+List element order remains strictly significant:
 
 ```php
 $fingerprint->hash(['first', 'second'])
     !== $fingerprint->hash(['second', 'first']);
 ```
 
-## Supported values
+### Supported Values and Limitations
 
-- `null`, booleans, integers, finite floats (`is_finite()`) and valid UTF-8 strings;
-- lists with sequential integer keys `0..n-1`;
-- associative arrays with string keys;
-- recursive combinations of those values.
+- `null`, booleans, integers, finite floats (`is_finite()`), and valid UTF-8 strings.
+- Sequential lists with integer keys `0..n-1`.
+- Associative arrays with string keys.
+- Nested combinations of supported types.
 
-Non-finite floats (`INF`, `NAN`), objects, enums, resources, invalid UTF-8 and mixed or non-sequential array keys throw `InvalidPayloadException`.
+Non-finite floats (`INF`, `NAN`), objects, enums, resources, invalid UTF-8, and mixed or non-sequential array keys throw `InvalidPayloadException`.
 
 The package does not remove volatile fields or normalize business values. Prepare the payload before hashing so the fingerprint represents exactly the changes relevant to your application.
 
-## Deterministic format
-
-1. Validate the supported PHP value grammar.
-2. Sort associative keys recursively using bytewise `SORT_STRING`.
-3. Preserve list order.
-4. Encode compact JSON with `JSON_UNESCAPED_UNICODE`, `JSON_UNESCAPED_SLASHES` and `JSON_THROW_ON_ERROR`.
-5. Hash the resulting bytes with SHA-256.
-
-This is a deliberately small PHP canonicalization contract, not an implementation of RFC 8785 JCS.
-
-## Development
+## Testing
 
 ```bash
-composer validate --strict
 composer test
+# or
+vendor/bin/phpunit
 ```
 
 ## License
 
-StableFingerprint is open-source software licensed under the [MIT License](LICENSE).
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
