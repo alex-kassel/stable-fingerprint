@@ -8,7 +8,7 @@
 
 Small, deterministic SHA-256 fingerprints for pre-prepared PHP payloads.
 
-StableFingerprint recursively sorts associative keys, preserves list order, encodes compact JSON and returns either a hexadecimal or raw binary SHA-256 digest. It deliberately avoids object normalization, floating-point policy and business-specific data cleanup.
+StableFingerprint recursively sorts associative keys, preserves list order, canonicalizes finite float values, encodes compact JSON and returns either a hexadecimal or raw binary SHA-256 digest. It deliberately avoids object normalization and business-specific data cleanup.
 
 ## Installation
 
@@ -26,7 +26,7 @@ use AlexKassel\StableFingerprint\StableFingerprint;
 $fingerprint = new StableFingerprint();
 
 $payload = [
-    'price' => '19.90',
+    'price' => 19.90,
     'available' => true,
     'variants' => [
         ['size' => 'M', 'stock' => 4],
@@ -38,6 +38,12 @@ $hex = $fingerprint->hash($payload);      // 64 lowercase hexadecimal characters
 $binary = $fingerprint->binary($payload); // 32 raw bytes
 
 assert($hex === bin2hex($binary));
+```
+
+You can also use the static convenience helper:
+
+```php
+$hex = StableFingerprint::compute($payload);
 ```
 
 Associative key order does not affect the result:
@@ -56,12 +62,12 @@ $fingerprint->hash(['first', 'second'])
 
 ## Supported values
 
-- `null`, booleans, integers and valid UTF-8 strings;
+- `null`, booleans, integers, finite floats (`is_finite()`) and valid UTF-8 strings;
 - lists with sequential integer keys `0..n-1`;
 - associative arrays with string keys;
 - recursive combinations of those values.
 
-Floats, objects, enums, resources, invalid UTF-8 and mixed or non-sequential array keys throw `InvalidPayloadException`.
+Non-finite floats (`INF`, `NAN`), objects, enums, resources, invalid UTF-8 and mixed or non-sequential array keys throw `InvalidPayloadException`.
 
 The package does not remove volatile fields or normalize business values. Prepare the payload before hashing so the fingerprint represents exactly the changes relevant to your application.
 
