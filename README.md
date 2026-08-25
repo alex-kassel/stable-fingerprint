@@ -17,7 +17,7 @@ StableFingerprint recursively sorts associative keys, preserves list order, cano
 composer require alex-kassel/stable-fingerprint
 ```
 
-Requires PHP 8.3+ with the standard JSON and Hash extensions.
+Requires PHP 8.2+ with the standard JSON and Hash extensions.
 
 ## Usage
 

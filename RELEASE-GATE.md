@@ -8,8 +8,8 @@
 ## 📋 Executive Release Summary
 
 - **Package Name:** `alex-kassel/stable-fingerprint`
-- **Target Release Version:** `2.1.0`
-- **Target Branch / Commit:** `main` (`feae8e6`)
+- **Target Release Version:** `2.2.0`
+- **Target Branch / Commit:** `main` (`5044b85`)
 - **Release Verdict:** 🟢 **READY**
 - **Audit Framework Version:** `v1.0.8`
 - **Certification Date:** 2026-08-25
@@ -29,7 +29,7 @@
 | **03** | **Database & Migrations** | ⚪ N/A | Pure in-memory cryptographic hashing utility; no database connection or migrations. |
 | **04** | **Security & Host Isolation** | 🟢 PASS | `composer audit` (0 vulnerabilities); recursive loop detection and UTF-8 memory boundary safety. |
 | **05** | **Composer & Supply Chain** | 🟢 PASS | `composer validate --strict` (valid); `.gitattributes` verified via `git archive` test (0 test leaks). |
-| **06** | **Testing & Compatibility** | 🟢 PASS | `vendor/bin/phpunit` (18 tests, 28 assertions, 0 failures); PHP 8.3 & 8.4 matrix coverage. |
+| **06** | **Testing & Compatibility** | 🟢 PASS | `vendor/bin/phpunit` (18 tests, 28 assertions, 0 failures); PHP 8.2, 8.3 & 8.4 matrix coverage. |
 | **07** | **Consumer DX & Release** | 🟢 PASS | Isolated consumer smoke test passed (`hash()`, `compute()`, `binary()`); `CHANGELOG.md` created. |
 
 ---
@@ -70,7 +70,7 @@ OK (18 tests, 28 assertions)
 {
   "audit_run": ".audit/runs/alex-kassel/stable-fingerprint/2026-08-25_18-35-00",
   "package": "alex-kassel/stable-fingerprint",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "framework": "https://github.com/alex-kassel/laravel-package-audit",
   "environment": {
     "php": "8.4.24",
