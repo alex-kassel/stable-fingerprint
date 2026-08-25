@@ -1,5 +1,6 @@
 # StableFingerprint
 
+[![Audited with Laravel Package Audit](https://img.shields.io/badge/Audited%20by-Laravel%20Package%20Audit-22c55e?style=for-the-badge&logo=shield)](RELEASE-GATE.md)
 [![Latest Version](https://img.shields.io/packagist/v/alex-kassel/stable-fingerprint?style=for-the-badge&logo=packagist&logoColor=white&color=orange)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
 [![Tests](https://img.shields.io/github/actions/workflow/status/alex-kassel/stable-fingerprint/tests.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=tests&color=brightgreen)](https://github.com/alex-kassel/stable-fingerprint/actions/workflows/tests.yml)
 [![PHP](https://img.shields.io/packagist/dependency-v/alex-kassel/stable-fingerprint/php?style=for-the-badge&logo=php&logoColor=white&color=777bb4)](https://packagist.org/packages/alex-kassel/stable-fingerprint)
