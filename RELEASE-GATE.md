@@ -1,7 +1,7 @@
 # 🚦 Release Gate Certification
 
-> 🛡️ **Audited by [Laravel Package Audit Framework](https://github.com/alex-kassel/laravel-package-audit)**  
-> This package has successfully passed all 7 industrial verification gates in accordance with the official 360-degree Laravel / PHP audit specification.
+> 🛡️ **Audited with [Laravel Package Audit Framework](https://github.com/alex-kassel/laravel-package-audit)**  
+> This package has passed all 7 verification gates in accordance with the open-source [Laravel Package Audit](https://github.com/alex-kassel/laravel-package-audit) specification.
 
 ---
 
