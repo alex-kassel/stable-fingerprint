@@ -5,6 +5,13 @@ All notable changes to `alex-kassel/stable-fingerprint` will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2026-08-26
+
+### Added
+- Standard 5-section gold `RELEASE-GATE.md` certification layout.
+- Cross-platform centered Hero header in `README.md` (`<h1 align="center">` + `<p align="center">`) for identical rendering across GitHub and Packagist.
+- Short `Audit: Verified` badge and high-value navigation Quick Links.
+
 ## [2.2.1] - 2026-08-25
 
 ### Changed

@@ -10,7 +10,7 @@
 | Attribute | Certified Value |
 |---|---|
 | **Package Name** | `alex-kassel/stable-fingerprint` |
-| **Target Release Version** | `2.0.0` |
+| **Target Release Version** | `2.2.2` |
 | **Target Branch / Commit** | `main` (`68485a8`) |
 | **Release Verdict** | 🟢 **READY FOR RELEASE** |
 | **Audit Framework Version** | `1.0.13` |
@@ -72,7 +72,7 @@ OK (18 tests, 28 assertions)
 {
   "audit_run": ".audit/runs/alex-kassel/stable-fingerprint/latest/",
   "package": "alex-kassel/stable-fingerprint",
-  "version": "2.0.0",
+  "version": "2.2.2",
   "commit": "68485a8",
   "framework": "https://github.com/alex-kassel/laravel-package-audit",
   "framework_version": "1.0.13",
