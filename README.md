@@ -40,7 +40,7 @@ It recursively sorts associative keys, preserves list order, canonicalizes finit
 
 ## Requirements
 
-* **PHP:** 8.2+ (tested on 8.2, 8.3, 8.4)
+* **PHP:** 8.2+ (tested on 8.2, 8.3, 8.4, 8.5)
 * **Standard PHP Extensions:** `ext-hash`, `ext-json`
 
 ---
@@ -91,11 +91,23 @@ $hex = StableFingerprint::compute(['vendor' => 'audi', 'model' => 'q4']);
 
 ## Testing
 
-Run unit tests and static analysis:
+From the monorepo root, run the complete package verification pipeline:
 
 ```bash
-vendor/bin/phpunit -c packages/alex-kassel/stable-fingerprint/phpunit.xml
+composer pkg:check alex-kassel/stable-fingerprint --json
 ```
+
+---
+
+## Changelog
+
+Please see [CHANGELOG.md](CHANGELOG.md) for more information on what has changed recently.
+
+---
+
+## Security Vulnerabilities
+
+Please review the [security policy](https://github.com/alex-kassel/stable-fingerprint/security/policy) to report vulnerabilities.
 
 ---
 
