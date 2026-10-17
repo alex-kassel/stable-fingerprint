@@ -1,5 +1,6 @@
 {
     "name": "alex-kassel/stable-fingerprint",
+    "version": "2.2.2",
     "description": "Deterministic SHA-256 canonicalization and payload hashing for PHP",
     "type": "library",
     "license": "MIT",
